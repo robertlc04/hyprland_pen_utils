@@ -1,7 +1,12 @@
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::io::prelude::*;
+use std::process::Command;
+// use std::{env, thread};
 
-use crate::structs::Modes;
+// use hyprland::keyword::{Keyword, OptionValue};
+use hyprland::Result;
+
+use crate::structs::{Modes, SMonitors};
 
 mod structs;
 
@@ -9,8 +14,13 @@ fn main() -> std::io::Result<()> {
     const SOCKET_PATH: &str = "/tmp/pen_utils";
     let mut count_messages = 0;
 
-    let mut actual_mode = Modes::new();
+    let mut actual_monitor = SMonitors::new();
+    let mut actual_mode = Modes::new(&mut actual_monitor);
 
+    // Set input:tablet Keyword
+    // let _ = Keyword::set("input:tablet:output", "eDP-1");
+
+    
     // Verify if the socket exists
     if std::fs::metadata(SOCKET_PATH).is_ok() {
         println!("Deleting socket");
@@ -48,7 +58,7 @@ fn handler(mut stream: UnixStream,count_messages: &mut i32, modes: &mut Modes) -
         mode(smessage[1].to_string(), modes)
     }
     if smessage[0].contains("change") {
-        change()
+        let _ = change(modes);
     }
 
     stream.write(b"recived")?;
@@ -56,14 +66,48 @@ fn handler(mut stream: UnixStream,count_messages: &mut i32, modes: &mut Modes) -
     Ok(())
 }
 
-fn change() {
-    todo!()
+// TODO: Try to make other alternative to don't exec
+fn change(modes: &mut Modes) -> Result<()>  {
+
+    let mut hyprctl = Command::new("hyprctl");
+
+    const HDMI: &str = "keyword input:tablet:output HDMI-A-1";
+    const MAIN: &str = "keyword input:tablet:output eDP-1";
+
+
+    if modes.eq_mon("main".to_string()) {
+            hyprctl
+            .arg(HDMI)
+            .spawn()?;
+        modes.switch_mon();
+        return Ok(())
+        // println!("{modes:?}")
+    }
+
+    if modes.eq_mon("hdmi".to_string()) {
+        hyprctl
+            .arg(MAIN)
+            .spawn()?;
+        modes.switch_mon();
+        return Ok(())
+        // println!("{modes:?}")
+    }
+
+    // println!("ENTRE");
+    // let border_size = match Keyword::get("input:tablet:output") {
+    // let border_size = match Keyword::get("general:gaps_in") {
+    //     Ok(x) => println!("{x:?}"),
+    //     Err(e) => println!("{e:?}"),
+    // };
+    // let keyw = Keyword::get("input:tablet:output").unwrap().value;
+    // println!("VALUEEE {border_size}");
+    Ok(())
 }
 
 fn mode(mode: String, modes: &mut Modes) {
-    if !modes.eq(mode) {
-
-    }
+    // if !modes.eq(mode) {
+    //     modes.switch()
+    // }
     todo!()
 }
 

@@ -41,6 +41,9 @@ fn verify_args(arg: Args) -> Option<String> {
     if vect[0].contains("mode") && vect.len() < 2 {
        println!("The command mode have 1 argument");
        return None
+    } 
+    if vect[0].contains("change") {
+       return Some(vect.join(" "))
     }
     if !vect[1].contains("track") && !vect[1].contains("manual") {
        println!("The argument it's incorrect");
