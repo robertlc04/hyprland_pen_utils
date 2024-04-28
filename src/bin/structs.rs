@@ -20,7 +20,6 @@ impl SMonitors {
             SMonitors::Main => SMonitors::HDMI,
             SMonitors::HDMI => SMonitors::Main
         };
-        println!("{newv:?}");
         *self = newv
     }
 }
@@ -33,6 +32,17 @@ impl Modes {
 }
 
 impl Modes {
+    pub fn get_actual(self) -> String {
+        match self {
+            Self::Manual(monitor) => {
+                match monitor {
+                    SMonitors::HDMI => "HDMI-A-1".to_string(),
+                    SMonitors::Main => "eDP-1".to_string()
+                }
+            },
+            Self::Track => "None".to_string()
+        }
+    }
     pub fn eq_mode(self, tocmp: String) -> bool {
         if self.cmp_mode(tocmp) {
             return true
@@ -47,7 +57,7 @@ impl Modes {
     }
 
     pub fn switch_mode(&mut self) {
-        match self {
+        *self = match self {
             Modes::Manual(_) => Modes::Track,
             Modes::Track => Modes::Manual(SMonitors::Main)
         };
