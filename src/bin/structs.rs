@@ -115,5 +115,4 @@ impl Modes {
         }
         false
     }
-
 }

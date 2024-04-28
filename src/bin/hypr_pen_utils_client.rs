@@ -1,6 +1,9 @@
 use std::env::{self, Args};
 use std::os::unix::net::UnixStream;
 use std::io::prelude::*;
+use std::time::Duration;
+
+use hyprland::ctl::Color;
 
 fn main() -> std::io::Result<()> {
     const SOCKET_PATH: &str = "/tmp/pen_utils";
@@ -14,7 +17,14 @@ fn main() -> std::io::Result<()> {
         }
     };
     
-    let mut stream = UnixStream::connect(SOCKET_PATH)?;   
+    let mut stream = UnixStream::connect(SOCKET_PATH).map_err(|x| {
+        hyprland::ctl::notify::call(
+            hyprland::ctl::notify::Icon::Error, 
+            Duration::from_secs(5), 
+            Color::new(1, 1, 1, 1),
+            format!("  Pen Utils Error: {}",x.to_string())).unwrap();
+        Err::<UnixStream,std::io::Error>(x)
+    }).unwrap();   
 
     stream.write_all(message.as_bytes())?;
     stream.shutdown(std::net::Shutdown::Write)?;

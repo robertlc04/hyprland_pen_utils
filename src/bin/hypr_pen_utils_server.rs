@@ -1,5 +1,5 @@
 use std::sync::mpsc::{self, Receiver, Sender};
-use std::thread::{self, JoinHandle, Thread};
+use std::thread;
 use std::{char, env};
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::io::prelude::*;
@@ -106,16 +106,13 @@ fn manual_change(cmp: String) -> std::io::Result<()> {
     const HDMI: &str = "keyword input:tablet:output HDMI-A-1";
     const MAIN: &str = "keyword input:tablet:output eDP-1";
 
-    println!("{cmp}");
     if cmp.contains("eDP-1") {
-        println!("LAPTOP");
         hyprctl
             .arg(MAIN)
             .spawn()?;
         return Ok(())
     }
     if cmp.contains("HDMI-A-1") {
-        println!("MONITOR");
         hyprctl
             .arg(HDMI)
             .spawn()?;
